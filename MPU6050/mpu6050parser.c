@@ -1,3 +1,10 @@
+//
+//  main.c
+//  MPU6050AVG
+//
+//  Created by 이정우 on 2023/05/05.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,23 +66,46 @@ void parseMPU6050Data(char *str, MPU6050Data *data)
     }
 }
 
+// 데이터 받아올 때마다 누적 데이터의 평균 값 뽑아내도록 수정
+
 int main()
 {
 
-    printf("센서 데이터: ");
-    char sensordata[80];
-    fgets(sensordata, 200, stdin);
-    // gets(sensordata);
-    //  입력 문자열 파싱하여 구조체에 저장
-    MPU6050Data data;
-    parseMPU6050Data(sensordata, &data);
+    // 누적 변수 선언
+    int totAcX = 0;
+    int totAcY = 0;
+    int totAcZ = 0;
+    int totGyX = 0;
+    int totGyY = 0;
+    int totGyZ = 0;
+    int count = 0;
 
-    // 구조체에 저장된 값 출력
-    printf("X축 가속도 = %d\n", data.AcX);
-    printf("Y축 가속도 = %d\n", data.AcY);
-    printf("Z축 가속도 = %d\n", data.AcZ);
-    printf("온도 = %f\n", data.Tmp);
-    printf("X축 자이로스코프 기울기 = %d\n", data.GyX);
-    printf("Y축 자이로스코프 기울기 = %d\n", data.GyY);
-    printf("Z축 자이로스코프 기울기 = %d\n", data.GyZ);
+    while (count != -1)
+    { // 종료조건 미지정 오류 해결 위해 허수 조건문 넣어줌. 결국 무한루프
+
+        printf("센서 데이터: ");
+        char sensordata[80];
+        fgets(sensordata, 200, stdin);
+        MPU6050Data data;
+        parseMPU6050Data(sensordata, &data);
+
+        // 현재까지 데이터 받은 횟수 저장 변수
+        count = count + 1;
+
+        // 값 누적부
+        totAcX = totAcX + data.AcX;
+        totAcY = totAcY + data.AcY;
+        totAcZ = totAcZ + data.AcZ;
+        totGyX = totGyX + data.GyX;
+        totGyY = totGyY + data.GyY;
+        totGyZ = totGyZ + data.GyZ;
+
+        // 각 데이터의 평균 값 출력
+        printf("X축 가속도 평균 = %d\n", (int)totAcX / count);
+        printf("Y축 가속도 평균 = %d\n", (int)totAcY / count);
+        printf("Z축 가속도 평균 = %d\n", (int)totAcZ / count);
+        printf("X축 자이로스코프 기울기 평균 = %d\n", (int)totGyX / count);
+        printf("Y축 자이로스코프 기울기 평균 = %d\n", (int)totGyY / count);
+        printf("Z축 자이로스코프 기울기 평균 = %d\n", (int)totGyZ / count);
+    }
 }
